@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ProductsModule } from './modules/products/products.module';
 // import { UsersModule } from './users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
+
 // import { UsersModule } from './modules/users/users.module';
 
 const mongoUri =
@@ -15,8 +16,6 @@ const mongoUri =
     MongooseModule.forRoot(mongoUri, { useNewUrlParser: true }),
     ProductsModule,
     AuthModule,
-    // UsersModule,
-    // UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
