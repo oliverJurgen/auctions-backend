@@ -11,7 +11,9 @@ import {
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateCurentBidDto } from './dto/update-current-bid.dto';
-import { AuthGuard } from './guards/auth.guard';
+import { AuthGuard } from '../../guards/auth.guard';
+import { RequestDec } from '../../decorators/request.decorator';
+import { UserIdPipe } from '../../pipes/user-id.pipe';
 
 @Controller('products')
 export class ProductsController {
@@ -34,8 +36,12 @@ export class ProductsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBid: UpdateCurentBidDto) {
-    return this.productsService.updateCurrentBid(id, updateBid);
+  update(
+    @Param('id') id: string,
+    @Body() updateBid: UpdateCurentBidDto,
+    @RequestDec(new UserIdPipe()) userId,
+  ) {
+    return this.productsService.updateCurrentBid(id, updateBid, userId);
   }
 
   @Delete(':id')

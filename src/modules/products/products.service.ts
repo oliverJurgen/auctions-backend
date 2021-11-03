@@ -32,7 +32,10 @@ export class ProductsService {
   async updateCurrentBid(
     id: string,
     update: UpdateCurentBidDto,
+    userId: string,
   ): Promise<SuccessDto | string> {
+    console.log({ userId });
+
     const product = (await this.productModel.findById(id).exec()) as any;
     if (product) {
       const { bidCount, currentBid, availableUntil, minimumBid } = product;
