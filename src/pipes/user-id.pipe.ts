@@ -7,9 +7,10 @@ export class UserIdPipe implements PipeTransform {
   constructor() {}
 
   transform(request: any) {
-    const token = request?.headers?.authorization.slice(6);
+    const isBearer = request?.headers?.authorization.slice(0, 6) === 'Bearer';
+    const token = request?.headers?.authorization.slice(7);
     const user = Users[token];
-    if (user) {
+    if (user && isBearer) {
       return user?.userId;
     }
     return null;
