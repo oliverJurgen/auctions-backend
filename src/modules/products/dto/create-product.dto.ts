@@ -4,6 +4,7 @@ export class CreateProductDto {
   readonly category: string;
   readonly minimumBid: number;
   readonly currentBid: number;
+  readonly lastBidder: string;
   readonly owner: string;
   readonly bidCount: number;
   readonly availableUntil: string;
