@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { isNil, omitBy } from 'lodash';
 import coercedGet from 'src/utils/coercedGet';
@@ -21,25 +21,20 @@ export class ProductsService {
     return newProduct;
   }
 
-  async findAll(findAllDto: FindAllDto): Promise<Array<Product>> {
-    const { filter } = findAllDto as any;
-
-    if (filter) {
+  async findAll(findAllDto?: FindAllDto): Promise<Array<Product>> {
+    if (findAllDto) {
+      const { filter } = findAllDto;
       const category = coercedGet(filter, 'category.in', null);
       const minimumBid = coercedGet(filter, 'minimumBid', null) && {
         $gt: filter?.minimumBid,
       };
 
-      const bidCount = coercedGet(filter, 'bidCount', null) && {
-        $gt: filter?.bidCount,
-      };
+      const sort = coercedGet(filter, 'sort', null);
 
-      const procFilter = omitBy(
-        { ...filter, category, minimumBid, bidCount },
-        isNil,
-      );
-
-      const products = await this.productModel.find(procFilter).exec();
+      const procFilter = omitBy({ ...filter, category, minimumBid }, isNil);
+      const products = sort
+        ? await this.productModel.find(procFilter).exec()
+        : await this.productModel.find(procFilter).sort({ sort: 1 }).exec();
 
       return products;
     }
@@ -62,7 +57,7 @@ export class ProductsService {
 
     const product = await this.productModel.findById(productId).exec();
 
-    const { lastBidder, bidCount, currentBid, autoBidSubscribers, _id } =
+    const { lastAutoBidder, bidCount, currentBid, autoBidSubscribers, _id } =
       product;
     if (currUser) {
       const newBidCount = bidCount + 1;
@@ -76,17 +71,20 @@ export class ProductsService {
         // Update Previous Bidders bid Data ====
         // Subtract currentBid from last Bidders curretAutoBidSum
         const previousUser = Object.values(Users).filter(
-          (item) => item.userId === lastBidder,
+          (item) => item.userId === lastAutoBidder,
         ) as any;
-        const prevUsersToken = previousUser.auth.token;
-        const prevUserCurrentAutoBidSum =
-          previousUser.bidData.currentAutoBidSum;
-        const prevUserNewBidData = {
-          ...previousUser.bidData,
-          currentAutoBidSum: prevUserCurrentAutoBidSum - currentBid,
-        };
-        //mutate mock Users DB *** Previous User
-        Users[prevUsersToken].bidData = prevUserNewBidData;
+
+        if (previousUser) {
+          const prevUsersToken = previousUser.auth.token;
+          const prevUserCurrentAutoBidSum =
+            previousUser.bidData.currentAutoBidSum;
+          const prevUserNewBidData = {
+            ...previousUser.bidData,
+            currentAutoBidSum: prevUserCurrentAutoBidSum - currentBid,
+          };
+          //mutate mock Users DB *** Previous User
+          Users[prevUsersToken].bidData = prevUserNewBidData;
+        }
 
         // Update Current Users bid Data ====
         // Add newCurrentBid to Current Bidders currentAutoBidSum
@@ -103,7 +101,7 @@ export class ProductsService {
           .findByIdAndUpdate(_id, {
             bidCount: newBidCount,
             currentBid: newCurrentBid,
-            lastBidder: newBidder,
+            lastAutoBidder: newBidder,
           })
           .exec();
 
@@ -129,7 +127,6 @@ export class ProductsService {
     const product = await this.productModel.findById(productId).exec();
     const { autoBidSubscribers } = product;
     let autoBidBasis = [...autoBidSubscribers];
-    // [1, 2]
     let index = 0;
 
     while (autoBidBasis.length) {
@@ -187,15 +184,11 @@ export class ProductsService {
         }
       }
       if (currentDateTime >= availableUntil) {
-        return 'Item availability expired.';
+        throw new HttpException('Item availability expired.', 400);
       }
-      return 'Invalid Bid Amount';
+      throw new HttpException('Invalid Bid Amount', 400);
     }
 
-    return 'Product Not Found';
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+    throw new HttpException('Product Not Found', 400);
   }
 }

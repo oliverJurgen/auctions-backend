@@ -28,6 +28,7 @@
     "@nestjs/platform-express": "^7.5.1",
     "@nestjs/swagger": "^4.8.2",
     "basic-authorization-header": "^0.2.7",
+    "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
     "lodash": "^4.17.21",
     "mongoose": "^6.0.12",

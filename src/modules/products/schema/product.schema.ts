@@ -6,7 +6,7 @@ const ProductSchema = new mongoose.Schema({
   category: String,
   minimumBid: Number,
   currentBid: Number,
-  lastBidder: String,
+  lastAutoBidder: String,
   owner: String, //userId
   bidCount: Number,
   availableUntil: String, // TimeStamp (Date & Time)

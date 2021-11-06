@@ -5,7 +5,6 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
@@ -20,14 +19,20 @@ import { UserIdPipe } from '../../pipes/user-id.pipe';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @Post()
+  @Post('/create')
   create(@Body() createProductDto: CreateProductDto) {
     return this.productsService.create(createProductDto);
   }
 
   @Get()
   @UseGuards(AuthGuard)
-  findAll(@Body() findAllDto: FindAllDto) {
+  findAll() {
+    return this.productsService.findAll();
+  }
+
+  @Post()
+  @UseGuards(AuthGuard)
+  findAllWithFilter(@Body() findAllDto: FindAllDto) {
     return this.productsService.findAll(findAllDto);
   }
 
@@ -47,8 +52,8 @@ export class ProductsController {
     return this.productsService.updateCurrentBid(id, updateBid, userId);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.productsService.remove(+id);
+  // }
 }

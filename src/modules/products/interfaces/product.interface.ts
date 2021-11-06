@@ -6,7 +6,7 @@ export interface Product extends Document {
   readonly category: string;
   readonly minimumBid: number;
   readonly currentBid: number;
-  readonly lastBidder: string;
+  readonly lastAutoBidder: string;
   readonly owner: string;
   readonly bidCount: number;
   readonly availableUntil: string;
