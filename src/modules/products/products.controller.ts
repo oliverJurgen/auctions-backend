@@ -11,6 +11,7 @@ import {
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateCurentBidDto } from './dto/update-current-bid.dto';
+import { FindAllDto } from './dto/find-all.dto';
 import { AuthGuard } from '../../guards/auth.guard';
 import { RequestDec } from '../../decorators/request.decorator';
 import { UserIdPipe } from '../../pipes/user-id.pipe';
@@ -26,11 +27,12 @@ export class ProductsController {
 
   @Get()
   @UseGuards(AuthGuard)
-  findAll() {
-    return this.productsService.findAll();
+  findAll(@Body() findAllDto: FindAllDto) {
+    return this.productsService.findAll(findAllDto);
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard)
   findOne(@Param('id') id: string) {
     return this.productsService.findOne(id);
   }

@@ -6,8 +6,9 @@ export const Users = {
       password: 'password',
       token: 'dXNlcjM6cGFzc3dvcmQ=',
     },
+
     bidData: {
-      currentBidAmount: 5353,
+      currentAutoBidSum: 0,
       maximumBidAmount: 1000000,
       bidAlertPercentage: 60,
     },
@@ -20,7 +21,7 @@ export const Users = {
       token: 'dXNlcjM6cGFzc3dvcmQ=',
     },
     bidData: {
-      currentBidAmount: 2300,
+      currentAutoBidSum: 0,
       maximumBidAmount: 1000000,
       bidAlertPercentage: 70,
     },
@@ -33,7 +34,7 @@ export const Users = {
       token: 'dXNlcjM6cGFzc3dvcmQ=',
     },
     bidData: {
-      currentBidAmount: 301,
+      currentAutoBidSum: 0,
       maximumBidAmount: 1000000,
       bidAlertPercentage: 80,
     },

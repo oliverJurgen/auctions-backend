@@ -8,6 +8,8 @@ export interface Product extends Document {
   readonly currentBid: number;
   readonly lastBidder: string;
   readonly owner: string;
+  readonly bidCount: number;
   readonly availableUntil: string;
   readonly imageId: string;
+  readonly autoBidSubscribers: string[];
 }

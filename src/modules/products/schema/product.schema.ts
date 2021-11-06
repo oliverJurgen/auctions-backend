@@ -11,6 +11,7 @@ const ProductSchema = new mongoose.Schema({
   bidCount: Number,
   availableUntil: String, // TimeStamp (Date & Time)
   imageId: String, // 1,2,3,4
+  autoBidSubscribers: [String], // userIds array
 });
 
 export { ProductSchema };
