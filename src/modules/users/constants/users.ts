@@ -21,8 +21,8 @@ export const Users = {
       token: 'dXNlcjM6cGFzc3dvcmQ=',
     },
     bidData: {
-      currentAutoBidSum: 0,
-      maximumBidAmount: 1000000,
+      currentAutoBidSum: 5,
+      maximumBidAmount: 2000,
       bidAlertPercentage: 70,
     },
   },
@@ -35,8 +35,22 @@ export const Users = {
     },
     bidData: {
       currentAutoBidSum: 0,
-      maximumBidAmount: 1000000,
+      maximumBidAmount: 3000,
       bidAlertPercentage: 80,
     },
   },
+};
+
+export type UserType = {
+  userId: string;
+  auth: {
+    username: string;
+    password: string;
+    token: string;
+  };
+  bidData: {
+    currentAutoBidSum: number;
+    maximumBidAmount: number;
+    bidAlertPercentage: number;
+  };
 };

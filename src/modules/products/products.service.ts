@@ -7,7 +7,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateCurentBidDto } from './dto/update-current-bid.dto';
 import { FindAllDto } from './dto/find-all.dto';
 import { SuccessDto } from './dto/success-dto';
-import { Users } from '../users/constants/users';
+import { Users, UserType } from '../users/constants/users';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
@@ -47,21 +47,22 @@ export class ProductsService {
     const product = await this.productModel.findById(id).exec();
     if (product) return product;
 
-    return 'Product Not Found';
+    throw new HttpException('Product Not Found', 400);
   }
 
   async updateAutoBid(userId: string, productId: string) {
-    const currUser = Object.values(Users).filter(
+    const currUser: UserType = Object.values(Users).filter(
       (item) => item.userId === userId,
-    ) as any;
+    )[0] as any;
 
     const product = await this.productModel.findById(productId).exec();
+    // console.log({ productId, product });
 
     const { lastAutoBidder, bidCount, currentBid, autoBidSubscribers, _id } =
       product;
     if (currUser) {
       const newBidCount = bidCount + 1;
-      const newCurrentBid = bidCount + 1;
+      const newCurrentBid = currentBid + 1;
       const newBidder = userId;
       // ===============
 
@@ -70,9 +71,9 @@ export class ProductsService {
       if (maximumBidAmount >= currentAutoBidSum) {
         // Update Previous Bidders bid Data ====
         // Subtract currentBid from last Bidders curretAutoBidSum
-        const previousUser = Object.values(Users).filter(
+        const previousUser: UserType = Object.values(Users).filter(
           (item) => item.userId === lastAutoBidder,
-        ) as any;
+        )[0] as any;
 
         if (previousUser) {
           const prevUsersToken = previousUser.auth.token;
@@ -108,7 +109,7 @@ export class ProductsService {
         return newProd;
       }
       // unsubscribe user when currentAutoBidSum exceeds or is equal to maximumBidAmount
-      const newSubscribers = autoBidSubscribers.filter(
+      const newSubscribers: Array<string> = autoBidSubscribers.filter(
         (item) => item !== userId,
       );
       const newProd = this.productModel
@@ -126,18 +127,27 @@ export class ProductsService {
   async loopAutoBidSubscribers(userId: string, productId: string) {
     const product = await this.productModel.findById(productId).exec();
     const { autoBidSubscribers } = product;
-    let autoBidBasis = [...autoBidSubscribers];
+    const autoBidBasis = [...autoBidSubscribers];
     let index = 0;
 
-    while (autoBidBasis.length) {
+    const asyncCalls = [];
+
+    while (index < autoBidBasis.length) {
       const currUserId = autoBidBasis[index];
-      const newProduct = await this.updateAutoBid(currUserId, productId);
-      index += 1;
-      // after last item
-      if (autoBidBasis.length - 1 === index) {
-        const { autoBidSubscribers: newAutoBidSubscribers } = newProduct;
-        autoBidBasis = newAutoBidSubscribers;
-        index = 0;
+      index++;
+      console.log({ currUserId, index });
+
+      asyncCalls.push(this.updateAutoBid(currUserId, productId));
+
+      if (autoBidBasis.length === index) {
+        const result = await Promise.all(asyncCalls);
+        if (result.length) {
+          const newProduct = result[result.length - 1];
+
+          const { autoBidSubscribers: newAutoBidSubscribers } = newProduct;
+          console.log({ newAutoBidSubscribers });
+          // index = 0;
+        }
       }
     }
   }
@@ -147,7 +157,7 @@ export class ProductsService {
     update: UpdateCurentBidDto,
     userId: string,
   ): Promise<SuccessDto | string> {
-    console.log({ userId });
+    // console.log({ userId });
 
     const product = (await this.productModel.findById(id).exec()) as any;
     if (product) {
@@ -162,7 +172,9 @@ export class ProductsService {
       // validations:
       // Check if new bid exceeds previous bid
       // Check if current dateTime exceeds availability expiration
+      // console.log({ newCurrentBid, currentBid, minimumBid });
       if (isValidBid && isAvailable) {
+        // console.log({ isValidBid });
         const newBidCount = bidCount + 1;
         const newProduct = await this.productModel
           .findByIdAndUpdate(id, {
@@ -171,11 +183,11 @@ export class ProductsService {
           })
           .exec();
 
-        // AUTO BID IMP HERE
-        const { autoBidSubscribers, _id } = newProduct;
-        if (autoBidSubscribers.length) {
-          await this.loopAutoBidSubscribers(userId, _id);
-        }
+        // AUTO BID IMP HERE - DDNT FINISH AUTO BID
+        // const { autoBidSubscribers, _id } = newProduct;
+        // if (autoBidSubscribers.length) {
+        //   await this.loopAutoBidSubscribers(userId, _id);
+        // }
 
         if (newProduct) {
           return {
