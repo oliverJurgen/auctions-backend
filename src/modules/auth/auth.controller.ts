@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, HttpException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import * as basic from 'basic-authorization-header';
@@ -21,6 +21,6 @@ export class AuthController {
       }
     }
 
-    return 'User Not Found';
+    throw new HttpException('User Not Found', 400);
   }
 }

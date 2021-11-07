@@ -155,7 +155,7 @@ export class ProductsService {
   async updateCurrentBid(
     id: string,
     update: UpdateCurentBidDto,
-    userId: string,
+    // userId: string,
   ): Promise<SuccessDto | string> {
     // console.log({ userId });
 
